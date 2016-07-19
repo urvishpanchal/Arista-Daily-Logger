@@ -17,6 +17,7 @@ server.starttls()
 server.login("msft-alerts-ext@arista.com","lsgipeqsjpdhsjiu")
 fromAddr = "msft-alerts-ext@arista.com"
 toAddr = ["wasst@microsoft.com","msft-team@arista.com"]
+#toAddr = ["urvish@arista.com"]
 emailSubject = "Daily Automated SYSLOG Report"
 
 # Create Log report file
@@ -32,25 +33,28 @@ hosto_Parity = {}
 
 # List of errors that we are interested in
 errorStrings = ["%CAPACITY-1-UTILIZATION_HIGH",
-                "%SAND-3-DDR_BIST_FAILED",
+                "%ROUTING-3-HW_RESOURCE_FULL",
+		"%SAND-3-DDR_BIST_FAILED",
+		"%IP6ROUTING-3-HW_RESOURCE_FULL",
+		"%SAND-3-ROUTING_LEM_RESOURCE_FULL",
 		"%SAND-3-INTERRUPT_OCCURRED",
 		"%HARDWARE-3-ERROR_DETECTED",
                 "%HARDWARE-3-DROP_COUNTER",
 		"%HARDWARE-3-FPGA_PROGRAMMER_ERROR",
 		"%HARDWARE-3-FPGA_CONFIG_ERROR",
-		"%TRANSCEIVER-4-AUTHENTICATION_FAILED",
-                "%PROCMGR-4-TERMINATE_PROCESS_SIGQUIT",
                 "%BGP-5-IF-MAXROUTESWARNING",
 #                "PFC_WATCHDOG",
                 "%SAND-4-FABRICSERDES_LINK_FAILED",
-                "%FWK-3-SOCKET_CLOSE_LOCAL",
-                "%HARDWARE-6-PERR_CORRECTED",
-                "%PROGMGR-3-PROCESS_DELAYRESTART"]
-
+                "%PROGMGR-3-PROCESS_DELAYRESTART",
+		"%PROCMGR-6-PROCESS_RESTART"
+		]
 changeSeverity = {"%SAND-3-INTERRUPT_OCCURRED":2,
 		"%HARDWARE-3-ERROR_DETECTED":2,
 		"%HARDWARE-3-DROP_COUNTER":2,
-		"%SAND-3-DDR_BIST_FAILED":1}
+		"%BGP-5-IF-MAXROUTESWARNING":2,
+		"%ROUTING-3-HW_RESOURCE_FULL":2,
+		"%IP6ROUTING-3-HW_RESOURCE_FULL":2,
+		"%SAND-3-ROUTING_LEM_RESOURCE_FULL":2}
 
 today = datetime.utcnow().date()
 
@@ -127,6 +131,12 @@ res = es.search(index=indices,body={
 #      }
 #    }
 #  ],
+#  "aggs": {
+#    "2": {
+#      "date_histogram": {
+#        "field": "@timestamp",
+#        "interval": "30s",
+#        "pre_zone": "-07:00",
 #  "aggs": {
 #    "2": {
 #      "date_histogram": {
@@ -266,4 +276,3 @@ for key,value in sorted_list.iteritems():
 f.close()
 #print json.dumps(sorted_list)
 sendMail()
-
